@@ -1,83 +1,58 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// accepts input and animates the player
+// implement AI movement and animate NPCs
 public class Player : MonoBehaviour
 {
+    Animator animator;
 
-	//the animator component attached to this game object
-	Animator _animator;
-
-	//veloctiy upper clamp
-	public float m_maxVelocity;
-
-	//acceleration in unity units per second
-	public float m_acceleration;
-
-	//deccelaration speed with respect to acceleration speed
-	public float m_deccelerationMultiplier;
-
-	//rotation speed
+	public float maxVelocity;
+    public float acceleration;
+	public float deccelerationMultiplier;
 	public float rotationDegreesPerSecond = 360;
+	float velocity;
 
-	// the current velocity
-	float _velocity;
+	Vector2 input = Vector2.zero;
+    public bool tagged = false;
+    public bool target = false;
 
-	// the input vector
-	Vector2 _input = Vector2.zero;
-
-
-    void Start ()
+    void Start()
     {
-		//cache the animator
-		_animator = GetComponent<Animator> ();
+		animator = GetComponent<Animator>();
     }
 
-    void Update ()
+    void Update()
     {
-
-        // Obtain input information (See "Horizontal" and "Vertical" in the Input Manager)
         float horizontal = Input.GetAxis ("Horizontal");
         float vertical = Input.GetAxis ("Vertical");
         
-		//cache the input
-		_input.x = horizontal;
-		_input.y = vertical;
+		input.x = horizontal;
+		input.y = vertical;
 
-		//calculate input magnitude (you may use this to assign the blend parameter in your movement
-		// blend tree directly, the acceleration system in this example is given to showcase its
-		// potential effect on a PC without a controller)
-		float inputMag = _input.magnitude;
+		float inputMag = input.magnitude;
 
-
-        // Check for inputs
 		if (!Mathf.Approximately (vertical, 0.0f) || !Mathf.Approximately (horizontal, 0.0f)) {
 			Vector3 direction = new Vector3 (horizontal, 0.0f, vertical);
 			direction = Vector3.ClampMagnitude (direction, 1.0f);
 
-			// increment velocity
-			if (_velocity < m_maxVelocity) {
-				_velocity += m_acceleration * Time.deltaTime;
-				if (_velocity > m_maxVelocity)
-					_velocity = m_maxVelocity;
+			if (velocity < maxVelocity) {
+				velocity += acceleration * Time.deltaTime;
+				if (velocity > maxVelocity)
+					velocity = maxVelocity;
 			}
 
-			// look towards the input direction
 			transform.rotation = Quaternion.RotateTowards (transform.rotation, Quaternion.LookRotation (direction), rotationDegreesPerSecond * Time.deltaTime);
-
-
-		} else if (_velocity > 0){
+            
+		} else if (velocity > 0){
 			
-			//decrement velocity if there is no input
-			_velocity -= m_acceleration * m_deccelerationMultiplier * Time.deltaTime;
-			if (_velocity < 0)
-				_velocity = 0;
+			velocity -= acceleration * deccelerationMultiplier * Time.deltaTime;
+			if (velocity < 0)
+				velocity = 0;
 		}
 
-		// TODO: Translate the game object in world space
         if (transform.position.y < 0.1)
         {
-            transform.position += transform.forward * Time.deltaTime * _velocity;
+            transform.position += transform.forward * Time.deltaTime * velocity;
         }
         else
         {
@@ -85,8 +60,7 @@ public class Player : MonoBehaviour
             transform.position = newPos;
         }
 
-		// set the blend parameter in your animator's movement blend tree
-		_animator.SetFloat ("Blend", _velocity / m_maxVelocity);
+		animator.SetFloat ("Blend", velocity / maxVelocity);
 
         if (transform.position.z > 50)
         {
@@ -103,6 +77,29 @@ public class Player : MonoBehaviour
         if (transform.position.x < -50)
         {
             transform.position = new Vector3(50, transform.position.y, transform.position.z);
+        }
+
+        if (tagged)
+        {
+            this.tag = "Tagged";
+            transform.GetChild(0).gameObject.SetActive(false);
+            transform.GetChild(1).gameObject.SetActive(true);
+        }
+        else
+        {
+            this.tag = "Not Tagged";
+            transform.GetChild(0).gameObject.SetActive(true);
+            transform.GetChild(1).gameObject.SetActive(false);
+            velocity = 0;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Not Tagged")
+        {
+            tagged = false;
+            other.GetComponent<Player>().tagged = true;
         }
     }
 }
