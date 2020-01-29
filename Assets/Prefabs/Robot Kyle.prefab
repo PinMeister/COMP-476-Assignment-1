@@ -452,7 +452,7 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7398867636487557163}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   m_Radius: 0.5
   m_Height: 2
@@ -470,15 +470,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1167a37c559ad9c4fa29ec5aaf35f4ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destination: {x: 0, y: 0, z: 0}
-  distance: 0
   speed: 0
   maxSpeed: 3
-  stopRadius: 25
-  slowRadius: 50
+  satRadius: 5
+  targetRadius: 30
+  timeToTarget: 0.5
   rotationDegreesPerSecond: 360
   arrive: 0
   flee: 0
+  wander: 0
 --- !u!54 &6178783111767233429
 Rigidbody:
   m_ObjectHideFlags: 0
