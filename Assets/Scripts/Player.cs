@@ -5,8 +5,8 @@ public class Player : MonoBehaviour
 {
     Animator animator;
     
-    Vector3 destination;
-    Vector3 velocity;
+    public Vector3 destination;
+    public Vector3 velocity;
     float distance;
     public float speed;
     public float maxSpeed;
@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     public float targetRadius;
     public float timeToTarget;
     public float rotationDegreesPerSecond;
+    public string targetName;
 
     public bool arrive;
     public bool flee;
@@ -22,7 +23,6 @@ public class Player : MonoBehaviour
     void Start()
     {
         satRadius = 5;
-        targetRadius = 20;
         timeToTarget = 0.5f;
         rotationDegreesPerSecond = 360;
         animator = GetComponent<Animator>();
@@ -55,6 +55,7 @@ public class Player : MonoBehaviour
         {
             Target("Not Tagged");
             maxSpeed = 5;
+            targetRadius = 15;
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(true);
             transform.GetChild(2).gameObject.SetActive(false);
@@ -72,6 +73,7 @@ public class Player : MonoBehaviour
         {
             Target("Frozen");
             maxSpeed = 1;
+            targetRadius = 30;
             transform.GetChild(0).gameObject.SetActive(true);
             transform.GetChild(1).gameObject.SetActive(false);
             transform.GetChild(2).gameObject.SetActive(false);
@@ -100,6 +102,11 @@ public class Player : MonoBehaviour
         // Kinematic flee
         if (flee)
         {
+            if (GameObject.FindGameObjectWithTag("Tagged").GetComponent<Player>().targetName != this.name)
+            {
+                flee = false;
+                wander = true;
+            }
             Vector3 velocity = transform.position - destination;
             velocity.Normalize();
             velocity *= maxSpeed;
@@ -111,7 +118,15 @@ public class Player : MonoBehaviour
         // Kinematic wander
         if (wander && this.tag != "Frozen")
         {
-            destination = new Vector3(Random.Range(0, 50), 0, Random.Range(0, 50));
+            if (targetName == "")
+            {
+                destination = new Vector3(Random.Range(0, 50), 0, Random.Range(0, 50));
+            }
+            else
+            {
+                GameObject target = GameObject.Find(targetName);
+                destination = target.transform.position;
+            }
             velocity = destination - transform.position;
             velocity.Normalize();
             velocity *= maxSpeed;
@@ -129,6 +144,7 @@ public class Player : MonoBehaviour
         {
             if (Vector3.Distance(transform.position, opponent.transform.position) < targetRadius)
             {
+                targetName = opponent.name;
                 distance = Vector3.Distance(transform.position, opponent.transform.position);
                 destination = opponent.transform.position;
                 arrive = true;
@@ -137,6 +153,7 @@ public class Player : MonoBehaviour
             }
             else
             {
+                targetName = "";
                 arrive = false;
                 flee = false;
                 wander = true;
@@ -169,6 +186,7 @@ public class Player : MonoBehaviour
     {
         if (collision.tag == "Not Tagged" && this.tag == "Tagged")
         {
+            targetName = "";
             collision.tag = "Frozen";
             arrive = false;
             flee = false;
@@ -179,6 +197,10 @@ public class Player : MonoBehaviour
         }
         if (collision.tag == "Frozen" && this.tag == "Not Tagged")
         {
+            foreach (GameObject player in GameObject.FindGameObjectsWithTag("Not Tagged"))
+            {
+                player.GetComponent<Player>().targetName = "";
+            }
             collision.gameObject.tag = "Not Tagged";
             arrive = false;
             flee = false;
