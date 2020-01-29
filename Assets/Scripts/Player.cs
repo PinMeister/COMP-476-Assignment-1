@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
         if (this.tag == "Tagged")
         {
             Target("Not Tagged");
-            maxSpeed = 7;
+            maxSpeed = 5;
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(true);
             transform.GetChild(2).gameObject.SetActive(false);
