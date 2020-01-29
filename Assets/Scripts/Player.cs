@@ -55,7 +55,7 @@ public class Player : MonoBehaviour
         {
             Target("Not Tagged");
             maxSpeed = 5;
-            targetRadius = 15;
+            targetRadius = 20;
             transform.GetChild(0).gameObject.SetActive(false);
             transform.GetChild(1).gameObject.SetActive(true);
             transform.GetChild(2).gameObject.SetActive(false);
