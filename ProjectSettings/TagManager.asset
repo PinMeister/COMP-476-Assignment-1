@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Tagged
   - Not Tagged
+  - Frozen
   layers:
   - Default
   - TransparentFX
